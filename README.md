@@ -1,10 +1,7 @@
-### PrecICE
+# PrecICE
 
 ## A unified workflow for data-driven precision cell fate engineering via highly multiplexed gene control
 
-# cell_reprogram
-Multiplex CRISPR Cell Reprogramming
-Identifying the minimal set of transcription factors for precision reprogramming.
 
 ### Installation
 
