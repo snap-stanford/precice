@@ -1,10 +1,8 @@
 import scanpy as sc
-import os
 import scvi
 import pandas as pd
 from utils import remove_noise, mito_qc, keep_variable_genes, \
     remove_mito_ribo_genes
-import os
 import numpy as np
 #import scgen
 from pyscenic_utils import create_loom, get_non_unique_IDs, save_loom,\
@@ -13,10 +11,12 @@ import subprocess
 import os
 
 """
-Sets up the dataloader for the model that can then be used to run PRESCIENT
+This class is used to preprocess the data and run PRECICE. It is also used 
+to store the data and the results of the analysis. 
+
 """
 
-class prescient_data():
+class precice():
 
     def __init__(self, dir='./', path=None, adata=None, setting=None, hvg=True,
                  all_network_paths_file='./all_network_paths.csv',
@@ -65,17 +65,23 @@ class prescient_data():
                 self.preprocess()
             self.adata.write_h5ad(self.processed_name)
 
-    def scvi_preprocess(self):
+    def scvi_preprocess(self, n_top_genes=2000):
+        """
+        Preprocess the data using scvi functions
+        """
         remove_noise(self.adata)
         self.adata = mito_qc(self.adata)
 
-        scvi.data.poisson_gene_selection(self.adata, n_top_genes=2067)
+        scvi.data.poisson_gene_selection(self.adata, n_top_genes=n_top_genes)
         self.adata = self.adata[:, self.adata.var["highly_variable"]]  # focus on selected genes
         self.adata.layers["counts"] = self.adata.X.copy()
         
         self.adata = remove_mito_ribo_genes(self.adata)
             
     def preprocess(self, hvg=True):
+        """
+        Preprocess the data using standard scanpy functions
+        """
         ## TODO Check if var.index is gene names and is unique
 
         remove_noise(self.adata)
@@ -88,6 +94,9 @@ class prescient_data():
             self.adata = remove_mito_ribo_genes(self.adata)
         
     def set_up_scvi(self, batch_key):
+        """
+        Set up scvi model if performing batch correction using scVI
+        """
         self.adata = self.adata.copy()
         scvi.model.SCVI.setup_anndata(
             self.adata, layer="counts", batch_key=batch_key
@@ -105,7 +114,7 @@ class prescient_data():
             early_stopping_monitor="elbo_validation",
         )
         
-    def scvi_plot_setup(self):     
+    def scvi_plot_setup(self):
         
         SCVI_LATENT_KEY = "X_scVI"
         latent = self.scvi_model.get_latent_representation()
@@ -115,6 +124,9 @@ class prescient_data():
         sc.tl.umap(self.adata)
 
     def batch_effect_correction(self,  batch_key='batch', batches=None):
+        """
+        Batch effect correction using scGen
+        """
 
         if batches is None:
             batches = self.adata.obs[batch_key].unique()
@@ -136,6 +148,9 @@ class prescient_data():
         return self.corrected_subset
 
     def set_up_pyscenic(self, species, adata=None):
+        """
+        Set up PySCENIC for inferring gene regulatory networks
+        """
 
         if adata is None:
             adata = self.adata
@@ -171,6 +186,9 @@ class prescient_data():
     def set_transition(self, source_idx=None, target_idx=None,
                        label_map=None, index=True, colname='celltype',
                        source_name=None, target_name=None):
+        """
+        Set the source and target cells for the transition
+        """
 
         label_map = {x:'Source' for x in source_idx}
         label_map.update({x:'Target' for x in target_idx})
@@ -199,6 +217,10 @@ class prescient_data():
         self.transition = self.name + '_' + self.source_name + '_' + self.target_name
 
     def save_seurat(self):
+        """
+        Save the data in a format that can be easily loaded into Seurat for
+        differential expression analysis
+        """
 
         self.trans_subset.write_h5ad(self.name + '_' + self.source_name + '_' +
                                 self.target_name + '.h5ad')
@@ -219,6 +241,9 @@ class prescient_data():
     def get_DE(self, source_idx=None, target_idx=None, 
                target_name='target', source_name='source', 
                precomputed_DE=None):
+        """
+        Compute differential expression between source and target cells using scVI
+        """
 
         trans_name = source_name + '_to_' + target_name
         if precomputed_DE is not None:
@@ -231,6 +256,9 @@ class prescient_data():
             self.DE[trans_name] = self.convert_de_to_seurat_format(self.DE[trans_name])
             
     def write_DE_files(self, DE_dir='./'):
+        """
+        Write the differential expression results from scVI to a file
+        """
         
         for DE_name, DE_file in self.DE.items():
             out_name = DE_dir + 'DE_' + self.name + '_' + DE_name +'.csv'
@@ -246,8 +274,10 @@ class prescient_data():
         de_df = de_df[de_df['is_de_fdr_0.05']==True]
         de_df = de_df[np.logical_or(de_df['non_zeros_proportion1']>0.5, de_df['non_zeros_proportion2']>0.5)]
         de_df = de_df[np.logical_or(de_df['raw_mean1']>1, de_df['raw_mean2']>1)]
-        de_df['p_val_adj'] = 0.01
 
+        ## Since significance test was performed above just set value to 0.01
+        # so it isn't filtered by PreciCE
+        de_df['p_val_adj'] = 0.01
         de_df['p_val'] = 0.01
         de_df['pct.1'] = -1.0
         de_df['pct.2'] = -1.0
@@ -260,10 +290,13 @@ class prescient_data():
         return de_df
 
     def run_pyscenic(self, arboreto_path=None, pyscenic_path=None):
+        """
+        Run PySCENIC to infer gene regulatory networks
+        """
 
         ## Step 1
         # Run GRNBOOST2
-        ## TODO Check if adjacency matrix exists
+        ## Check if adjacency matrix exists
         ## if not then run arboreto and compute regulons
         
         print("Run these commands in the command line")
@@ -302,12 +335,14 @@ class prescient_data():
 
 
     def save_pyscenic_output(self):
-        
-        ## Step 3
-        # Save regulons in appropriate format
+
+        # Save regulons output from PySCENIC analysis in appropriate format
         save_regulons(self.name)
         
     def get_network(self, cell_type):
+        """
+        Get the network path for precomputed network for a specific cell type
+        """
         self.network_path = self.all_network_paths[cell_type]
         print('Network path loaded')
 
@@ -330,11 +365,15 @@ class prescient_data():
         # --out_dir ./
         pass
 
-    def run_prescient(self, species, 
+    def run_precice(self, species,
                       network_path, DE_path, 
                       pos_only=False, remove_TFs=None):
+        """
+        Run PRECICE to infer ranking of genes to perturb to achieve desired
+        transition
+        """
         
-        command_list = ["/dfs/user/yhr/uce/bin/python", "/dfs/user/yhr/cell_reprogram/model/flow_script.py", 
+        command_list = ["/dfs/user/yhr/uce/bin/python", "/dfs/user/yhr/cell_reprogram/model/run_precice.py",
                                 "--p_thresh", "2e-2",\
                                 "--hops", "3",\
                                 "--species", species,\

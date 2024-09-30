@@ -4,7 +4,7 @@ import numpy as np
 import networkx as nx
 
 sys.path.append('../model/')
-from flow import get_graph
+from precice_utils import get_graph
 from sklearn.model_selection import train_test_split
 from sklearn import linear_model
 from sklearn.neural_network import MLPRegressor

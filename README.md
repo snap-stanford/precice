@@ -34,11 +34,11 @@ conda install --file model/requirements.txt
 
 Worfklow for processing new dataset and running the model
 
-#### Step 1. Initialize PRESCIENT data processing workflow and preprocess dataset
+#### Step 1. Initialize PreciCE data processing workflow and preprocess dataset
 ```
-workflow = prescient_data(adata=adata,
-                          dir='./workflow_dir', 
-                          path='./hesc_dataset.h5ad')
+workflow = precice(adata=adata,
+                   dir='./workflow_dir', 
+                   path='./hesc_dataset.h5ad')
 ```
 
 #### Step 2. Computing differential expression
@@ -71,9 +71,9 @@ workflow.learn_weights()
 #### Step 4. Run PrecICE to identify optimal transcription factor perturbations
 ```
 transition = source_name +'_to_' + target_name
-workflow.run_prescient(species='human',
-                          network_path=self.network_path,
-                          DE_path=workflow.DE_filenames[transition])
+workflow.run_precice(species='human',
+                     network_path=self.network_path,
+                     DE_path=workflow.DE_filenames[transition])
 ```
 
 #### Step 5. Plot results

@@ -3,7 +3,7 @@ import numpy as np
 import glob as glob
 import networkx as nx
 import utils
-from flow import get_TFs
+from precice_utils import get_TFs
 
 def create_net(args):
     if args.name is None:

@@ -6,7 +6,7 @@ from scipy.stats import ncx2
 from os.path import isfile
 import os
 from tqdm import tqdm
-from flow import get_graph, get_expression_data,\
+from precice_utils import get_graph, get_expression_data,\
             add_weight, I_TF, get_TFs, solve,\
             solve_parallel, get_expression_lambda
 import pdb
