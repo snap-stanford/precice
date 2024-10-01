@@ -1,4 +1,4 @@
-# PrecICE
+# PreciCE
 
 ## A unified workflow for data-driven precision cell fate engineering via highly multiplexed gene control
 
