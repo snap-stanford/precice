@@ -18,8 +18,9 @@ to store the data and the results of the analysis.
 
 class precice():
 
-    def __init__(self, dir='./', path=None, adata=None, setting=None, hvg=True,
-                 all_network_paths_file='./all_network_paths.csv',
+    def __init__(self, dir='./', path=None, adata=None, batch_correct=False, 
+                 cell_filter=False, gene_filter=True, 
+                 all_network_paths_file='../data/all_network_paths.csv',
                  species='human'):
 
         self.name = path.split('/')[-1].split('.')[0]
@@ -29,6 +30,10 @@ class precice():
         self.tf_list = None
         self.f_motif_path = None
         self.f_db_name = None
+        
+        self.cell_filter = cell_filter
+        self.gene_filter = gene_filter
+        self.batch_correct = batch_correct
 
         self.source = None
         self.target = None
@@ -48,7 +53,7 @@ class precice():
             if self.path is None:
                 raise ValueError('Please provide path to raw data file')
 
-        if setting == 'scvi':
+        if batch_correct:
             self.scvi_model = None
             self.processed_name = os.path.join(self.dir,self.name + '_scvi_processed.h5ad')
         else:
@@ -59,40 +64,38 @@ class precice():
         else:
             print('Loading raw data...')
             self.adata = sc.read_h5ad(self.path)
-            if setting == 'scvi':
-                self.scvi_preprocess()
-            else:
-                self.preprocess()
+            self.preprocess()
             self.adata.write_h5ad(self.processed_name)
-
-    def scvi_preprocess(self, n_top_genes=2000):
-        """
-        Preprocess the data using scvi functions
-        """
-        remove_noise(self.adata)
-        self.adata = mito_qc(self.adata)
-
-        scvi.data.poisson_gene_selection(self.adata, n_top_genes=n_top_genes)
-        self.adata = self.adata[:, self.adata.var["highly_variable"]]  # focus on selected genes
-        self.adata.layers["counts"] = self.adata.X.copy()
-        
-        self.adata = remove_mito_ribo_genes(self.adata)
             
-    def preprocess(self, hvg=True):
+    def preprocess(self):
         """
         Preprocess the data using standard scanpy functions
         """
         ## TODO Check if var.index is gene names and is unique
+        
+        if self.cell_filter:
+            sc.pp.filter_cells(self.adata, min_genes=200)
+        
+        if self.gene_filter:
+            sc.pp.filter_genes(self.adata, min_cells=3)
+            
+        if self.cell_filter:
+            self.adata = mito_qc(self.adata)
 
-        remove_noise(self.adata)
-        self.adata = mito_qc(self.adata)
-
+        #scvi.data.poisson_gene_selection(self.adata, n_top_genes=n_top_genes)
+        #self.adata = self.adata[:, self.adata.var["highly_variable"]] 
+        #self.adata.layers['counts'] = self.adata.X.copy()
+            
+        
+        self.adata.layers['counts'] = self.adata.X.copy()
         sc.pp.normalize_total(self.adata, target_sum=1e4)
         sc.pp.log1p(self.adata)
-        if hvg:
+            
+        if self.gene_filter:
             self.adata = keep_variable_genes(self.adata)
             self.adata = remove_mito_ribo_genes(self.adata)
-        
+            
+
     def set_up_scvi(self, batch_key):
         """
         Set up scvi model if performing batch correction using scVI
@@ -268,6 +271,9 @@ class precice():
         
     
     def convert_de_to_seurat_format(self, de_df):
+        """
+        Specifically designed for scVI output
+        """
 
         de_df = de_df.reset_index()
         de_df['p_val_adj'] = 1.0
@@ -343,7 +349,7 @@ class precice():
         """
         Get the network path for precomputed network for a specific cell type
         """
-        self.network_path = self.all_network_paths[cell_type]
+        self.network_path = os.path.join('./data/networks',self.all_network_paths[cell_type])
         print('Network path loaded')
 
 
@@ -366,14 +372,15 @@ class precice():
         pass
 
     def run_precice(self, species,
-                      network_path, DE_path, 
+                      network_path, DE_path, python_path,
                       pos_only=False, remove_TFs=None):
         """
         Run PRECICE to infer ranking of genes to perturb to achieve desired
         transition
         """
         
-        command_list = ["/dfs/user/yhr/uce/bin/python", "/dfs/user/yhr/cell_reprogram/model/run_precice.py",
+        command_list = [python_path,
+                        "../model/run_precice.py",
                                 "--p_thresh", "2e-2",\
                                 "--hops", "3",\
                                 "--species", species,\

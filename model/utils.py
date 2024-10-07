@@ -37,9 +37,11 @@ def float_to_hsv(val, norm, cmap):
     return colorsys.rgb_to_hsv(mm[0], mm[1], mm[2])
 
 
-def remove_noise(adata):
-    sc.pp.filter_cells(adata, min_genes=200)
-    sc.pp.filter_genes(adata, min_cells=3)
+def remove_noise(adata, cell_filter=True, gene_filter=True):
+    if cell_filter:
+        sc.pp.filter_cells(adata, min_genes=200)
+    if gene_filter:
+        sc.pp.filter_genes(adata, min_cells=3)
 
 
 def mito_qc(adata):

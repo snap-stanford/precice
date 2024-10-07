@@ -304,7 +304,7 @@ if __name__ == '__main__':
                         default='human')
 
     # Lambda setting
-    parser.add_argument('--max_step', type=int, default=51,
+    parser.add_argument('--max_step', type=int, default=1,
                         help='(default: %(default)s)')
     parser.add_argument('--step_size', type=float, default=1e-4,
                         help='(default: %(default)s)')
