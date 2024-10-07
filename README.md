@@ -36,19 +36,30 @@ Worfklow for processing new dataset and running the model
 
 #### Step 1. Initialize PreciCE data processing workflow and preprocess dataset
 ```
-workflow = precice(adata=adata,
-                   dir='./workflow_dir', 
-                   path='./hesc_dataset.h5ad')
+path = '../data/Friedman.h5ad'
+raw_adata = sc.read_h5ad('../data/Friedman.h5ad')
+workflow = precice(adata=raw_adata, 
+                   path = path, 
+                   cell_filter=True)
 ```
 
-#### Step 2. Computing differential expression
+#### Step 2. Run batch correction (optional)
 ```
-## Add cell type transition information
-workflow.set_transition(label_map, colname='celltype')
-workflow.save_seurat()
+workflow.set_up_scvi(batch_key='day')
 
-## Run differential expression externally in R or internally in Python
-workflow.get_DE(DE='../Data/DE/DE_hesc_dataset.csv')
+## Visualize effects
+
+workflow.scvi_plot_setup()
+sc.pl.umap(workflow.adata, color='day')
+```
+
+#### Step 3. Compute differential expression
+```
+### Identify source and target cells
+source_name = 'stem'
+target_name = 'meso'
+
+workflow.get_DE(source_name=source_name, target_name=target_name)
 ```
 
 #### Step 3. Network inference: Either load pre-existing network
@@ -56,7 +67,7 @@ workflow.get_DE(DE='../Data/DE/DE_hesc_dataset.csv')
 workflow.get_network(cell_type='embryonic stem cell')
 ```
 
-#### Or infer network and edge weights
+#### Or infer network and edge weights [Can take several hours]
 ```
 ## Set up PySCENIC for given dataset
 workflow.set_up_pyscenic(species)
@@ -71,8 +82,9 @@ workflow.learn_weights()
 #### Step 4. Run PrecICE to identify optimal transcription factor perturbations
 ```
 transition = source_name +'_to_' + target_name
-workflow.run_precice(species='human',
-                     network_path=self.network_path,
+python_path = '/user/bin/python'
+workflow.run_precice(species='human', python_path=python_path,
+                     network_path=workflow.network_path,
                      DE_path=workflow.DE_filenames[transition])
 ```
 
