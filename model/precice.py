@@ -253,6 +253,14 @@ class precice():
             self.DE[trans_name] = pd.read_csv(DE, index_col=0)
 
         else:
+            ## TODO: needlessly complex, simplify
+            if source_idx is None:
+                source_barcodes = self.adata[self.adata.obs.label == source_name].obs.index.values
+                source_idx = np.where(self.adata.obs.index.isin(source_barcodes))[0]
+            if target_idx is None:
+                target_barcodes = self.adata[self.adata.obs.label == target_name].obs.index.values
+                target_idx = np.where(self.adata.obs.index.isin(target_barcodes))[0]
+
             # Compute differential expression using scVI
             self.DE[trans_name] = self.scvi_model.differential_expression(idx1=target_idx, 
                                                                           idx2=source_idx)
