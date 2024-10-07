@@ -62,7 +62,7 @@ target_name = 'meso'
 workflow.get_DE(source_name=source_name, target_name=target_name)
 ```
 
-#### Step 3. Network inference: Either load pre-existing network
+#### Step 4. Network inference: Either load pre-existing network
 ```
 workflow.get_network(cell_type='embryonic stem cell')
 ```
@@ -79,7 +79,7 @@ workflow.run_pyscenic()
 workflow.learn_weights()
 ```
 
-#### Step 4. Run PrecICE to identify optimal transcription factor perturbations
+#### Step 5. Run PrecICE to identify optimal transcription factor perturbations
 ```
 transition = source_name +'_to_' + target_name
 python_path = '/user/bin/python'
@@ -88,7 +88,7 @@ workflow.run_precice(species='human', python_path=python_path,
                      DE_path=workflow.DE_filenames[transition])
 ```
 
-#### Step 5. Plot results
+#### Step 6. Plot results
 ```
 ## Plot ranked list of perturbations and relative perturbation magnitude
 workflow.perturbation_plot(k=15)
