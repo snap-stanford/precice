@@ -4,7 +4,6 @@ import pandas as pd
 from utils import remove_noise, mito_qc, keep_variable_genes, \
     remove_mito_ribo_genes
 import numpy as np
-#import scgen
 from pyscenic_utils import create_loom, get_non_unique_IDs, save_loom,\
 create_target_genes, save_regulons
 import subprocess
@@ -116,7 +115,7 @@ class precice():
             early_stopping_patience=20,
             early_stopping_monitor="elbo_validation",
         )
-        
+
     def scvi_plot_setup(self):
         
         SCVI_LATENT_KEY = "X_scVI"
@@ -357,7 +356,7 @@ class precice():
         """
         Get the network path for precomputed network for a specific cell type
         """
-        self.network_path = os.path.join('./data/networks',self.all_network_paths[cell_type])
+        self.network_path = os.path.join('../data/networks',self.all_network_paths[cell_type])
         print('Network path loaded')
 
 
@@ -404,4 +403,16 @@ class precice():
             
         print("Running command:", ' '.join(command_list))
         result = subprocess.run(command_list)
+
+def get_sample_dataset():
+    ## If dataset exists don't download
+    if os.path.isfile('./data/Friedman.h5ad'):
+        return
+
+    # Download sample embryonic stem cell dataset
+    subprocess.run(["wget",
+                    "https://dataverse.harvard.edu/api/access/datafile/10591799"])
+
+    # Move file to data directory
+    subprocess.run(["mv", "10591799", "../data/Friedman.h5ad"])
 
