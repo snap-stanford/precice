@@ -1,15 +1,12 @@
 import pandas as pd
 import numpy as np
 import networkx as nx
-import statsmodels.stats.api as sms
-from scipy.stats import ncx2
 from os.path import isfile
 import os
 from tqdm import tqdm
 from precice_utils import get_graph, get_expression_data,\
             add_weight, I_TF, get_TFs, solve,\
             solve_parallel, get_expression_lambda
-import pdb
 
 class flow_model():
     def __init__(self, args):

@@ -1,11 +1,10 @@
 import scanpy as sc
 import scvi
 import pandas as pd
-from utils import remove_noise, mito_qc, keep_variable_genes, \
+from utils import mito_qc, keep_variable_genes, \
     remove_mito_ribo_genes
 import numpy as np
-from pyscenic_utils import create_loom, get_non_unique_IDs, save_loom,\
-create_target_genes, save_regulons
+from pyscenic_utils import create_loom, save_regulons
 import subprocess
 import os
 
@@ -372,7 +371,7 @@ class precice():
     def learn_weights(self):
         ## NOT implemented yet for website
         ## Use the expression matrix to learn the edge weights
-        ## python learn_weights_updated.py
+        ## python learn_weights.py
         # --data_path ../Notebooks/pijuan_sala_HVG.h5ad
         # --graph_name ../Data/transcription_networks/G_all_edges_pijuan_sala_meso
         # --out_dir ./

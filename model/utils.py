@@ -1,15 +1,6 @@
 import matplotlib.pyplot as plt
 import scanpy as sc
 import numpy as np
-import sys
-import pandas as pd
-import scanpy as sc
-import loompy as lp
-import numpy as np
-import pickle
-#import pyscenic
-import networkx as nx
-import os
 
 def invert_dict(map_):
     return {v: k for k, v in map_.items()}
