@@ -2,7 +2,6 @@ import pandas as pd
 import scanpy as sc
 import numpy as np
 
-import os
 import pandas as pd
 import numpy as np
 import seaborn as sns
@@ -236,8 +235,11 @@ def make_error_plot(fname, max_rows=12):
         ax.spines[axis].set_linewidth(2)
         ax.spines[axis].set_color("black")
 
-def make_precision_plot(fname, max_rows=12, output_name='precision_plot', source='source', target='target'):
+def make_precision_plot(fname, max_rows=12, source='source', target='target'):
+    
     X = pd.read_pickle(fname)
+    output_name = transition = source_name + '_to_' + target_name
+    
     precision_scores = X['Error reduction %'][:max_rows] * -1  # Inverting error reduction to match precision score
     perturbation_signs = []
     dicts, order = create_pert_boxplot([fname], sort=False)
@@ -289,9 +291,8 @@ def make_precision_plot(fname, max_rows=12, output_name='precision_plot', source
         ax.spines[axis].set_color("black")
     
     plt.grid(True, axis='y', linestyle='--', color='grey')
-
+    
     output_path = f"../data/plots/{output_name}.jpeg"
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
     plt.savefig(output_path, bbox_inches='tight', dpi=300)
     plt.show()
 
