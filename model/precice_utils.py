@@ -71,10 +71,10 @@ def add_weight(G, u, v, weight):
 # Set diagonal elements to 1 only for TFs
 def get_TFs(species):
     if species =='mouse':
-         TFs = pd.read_csv('/dfs/user/yhr/cell_reprogram/Data/TF_names/mouse_tf_gene_names_lowercase.txt',
+         TFs = pd.read_csv('../data/mouse_tf_gene_names_lowercase.txt',
                        delimiter='\t',header=None).iloc[:,0].values
     elif species=='human':
-         TFs = pd.read_csv('/dfs/user/yhr/cell_reprogram/Data/TF_names/TF_names_v_1.01_human.txt',
+         TFs = pd.read_csv('../data/TF_names_v_1.01_human.txt',
                        delimiter='\t',header=None).iloc[:,0].values
     return np.unique(TFs, return_counts=True)[0]
 
