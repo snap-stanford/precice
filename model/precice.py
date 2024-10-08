@@ -249,7 +249,7 @@ class precice():
 
         trans_name = source_name + '_to_' + target_name
         if precomputed_DE is not None:
-            self.DE[trans_name] = pd.read_csv(DE, index_col=0)
+            self.DE[trans_name] = pd.read_csv(precomputed_DE, index_col=0)
 
         else:
             ## TODO: needlessly complex, simplify
