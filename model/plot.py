@@ -2,6 +2,7 @@ import pandas as pd
 import scanpy as sc
 import numpy as np
 
+import os
 import pandas as pd
 import numpy as np
 import seaborn as sns
@@ -288,9 +289,9 @@ def make_precision_plot(fname, max_rows=12, output_name='precision_plot', source
         ax.spines[axis].set_color("black")
     
     plt.grid(True, axis='y', linestyle='--', color='grey')
-    
+
     output_path = f"../data/plots/{output_name}.jpeg"
-    # print(output_path, "\n")
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
     plt.savefig(output_path, bbox_inches='tight', dpi=300)
     plt.show()
 
