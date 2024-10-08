@@ -234,3 +234,64 @@ def make_error_plot(fname, max_rows=12):
     for axis in ['top','bottom','left','right']:
         ax.spines[axis].set_linewidth(2)
         ax.spines[axis].set_color("black")
+
+def make_precision_plot(fname, max_rows=12, output_name='precision_plot', source='source', target='target'):
+    X = pd.read_pickle(fname)
+    precision_scores = X['Error reduction %'][:max_rows] * -1  # Inverting error reduction to match precision score
+    perturbation_signs = []
+    dicts, order = create_pert_boxplot([fname], sort=False)
+
+    # Iterate through each gene in the list of dicts
+    for d in dicts:
+        for gene, values in d.items():
+            # Determine if the perturbation is positive or negative and store the corresponding arrow
+            average = sum(values) / len(values)
+            arrow = '↑' if average > 0 else '↓'
+            perturbation_signs.append((gene, arrow))
+
+    precision_scores = list(precision_scores)
+    perturbation_signs.insert(0, ('None', '')) # The first point is "No Perturbation"
+
+    data = {'Precision Score': precision_scores, 'Perturbation': perturbation_signs}
+    df = pd.DataFrame(data)
+
+    plt.figure(figsize=[5,8])
+    pos = range(len(df))
+    
+    # Plotting the Precision Score
+    plt.plot(df['Precision Score'], pos, color='purple', linewidth=4, zorder=1)
+    plt.scatter(df['Precision Score'], pos, color='white', edgecolor='black', s=400, zorder=2)
+    
+    ax = plt.gca()
+    
+    plt.xlabel('Precision Score (%)',  fontweight="bold")
+    plt.title(f'{source} to {target}') # Changes based on source and target
+    
+    # Y-axis labels have gene name and perturbation direction (arrow)
+    y_labels = [f'{gene} {perturb}' for gene, perturb in df['Perturbation']]
+
+    ax.set_yticks(pos)
+    ax.set_yticklabels(y_labels, ha='right')
+
+    # Add a purple "AND" next to each gene after the first (not including "None")
+    for i, (gene, perturb) in enumerate(df['Perturbation']):
+        if i > 1:
+            ax.text(-0.42, i, 'AND', color='purple', ha='right', va='center', transform=ax.get_yaxis_transform())
+    
+    ax.invert_yaxis()
+
+    ax.set_xticks([0, 0.1, 0.2, 0.3, 0.4, 0.5 ])
+    ax.set_xticklabels(['0','10','20', '30', '40', '50'])
+    
+    for axis in ['top', 'bottom', 'left', 'right']:
+        ax.spines[axis].set_linewidth(2)
+        ax.spines[axis].set_color("black")
+    
+    plt.grid(True, axis='y', linestyle='--', color='grey')
+    
+    output_path = f"../data/plots/{output_name}.jpeg"
+    # print(output_path, "\n")
+    plt.savefig(output_path, bbox_inches='tight', dpi=300)
+    plt.show()
+
+    return output_path
