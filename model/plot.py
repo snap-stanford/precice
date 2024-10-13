@@ -7,6 +7,7 @@ import numpy as np
 import seaborn as sns
 
 import networkx as nx
+import os
 
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
@@ -238,7 +239,7 @@ def make_error_plot(fname, max_rows=12):
 def make_precision_plot(fname, max_rows=12, source='source', target='target'):
     
     X = pd.read_pickle(fname)
-    output_name = transition = source_name + '_to_' + target_name
+    output_name = transition = source + '_to_' + target
     
     precision_scores = X['Error reduction %'][:max_rows] * -1  # Inverting error reduction to match precision score
     perturbation_signs = []
@@ -292,7 +293,12 @@ def make_precision_plot(fname, max_rows=12, source='source', target='target'):
     
     plt.grid(True, axis='y', linestyle='--', color='grey')
     
-    output_path = f"../data/plots/{output_name}.jpeg"
+    output_dir = "../data/plots"
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    
+    output_path = f"{output_dir}/{output_name}.jpeg"
+
     plt.savefig(output_path, bbox_inches='tight', dpi=300)
     plt.show()
 
