@@ -1,8 +1,9 @@
 anndata==0.10.9
+loompy==3.0.6
 numpy==1.26.4
 pandas==2.2.2
 scanpy==1.10.2
 tqdm==4.66.5
-multiprocessing
-sklearn==1.5.1
+scikit-learn==1.5.2
+scvi-tools==1.2.0
 networkx==3.3
