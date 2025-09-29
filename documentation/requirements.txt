@@ -1,3 +1,5 @@
+# NOTE (2025-09-29) NOT UP TO DATE
+
 anndata==0.10.9
 loompy==3.0.6
 numpy==1.26.4
