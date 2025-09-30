@@ -2,7 +2,7 @@
 ### RECOMMENDED WORKFLOW FOR RUNNING PRECICE IN PYTHON ###
 # Includes data preprocessing, differential expression, gene regulatory network inference, gene prediction #
 
-# In Python v3.10.17:
+# In Python 3.10.17:
 import os
 os.chdir('/path/to/precice/model')  # Set default working directory (currently required for correct paths)
 
@@ -21,7 +21,7 @@ from types import SimpleNamespace       # For SimpleNamespace()
 from pathlib import Path                # Required for creating and using project_directory
 
 ### 1. DEFINE KEY VARIABLES ###
-project_directory = Path("../data/output/2025-09-29_FriedmanStemToMeso")
+project_directory = Path("../data/output/2025-09-24_FriedmanStemToMeso")
 name = "Friedman.h5ad"          # Must match the .h5ad file name
 input_path = '../data/input/datasets/Friedman.h5ad'
 raw_adata = sc.read_h5ad('../data/input/datasets/Friedman.h5ad')
