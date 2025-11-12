@@ -15,7 +15,7 @@ We have optimized PreciCE by enabling the entire workflow (including gene regula
 ### INSTALLATION ###
 **Conda (exact, reproducible environment -- Linux x86_64 only for now)**
 
-This integrated workflow is sensitive to dependency versions. We  recommend recreating the environment from the explicit Conda spec:
+This integrated workflow is sensitive to dependency versions. We  recommend recreating the environment from the explicit Conda spec (see precice/documentation folder):
 
 ```bash
 # from a shell in /path/to/precice/documentation (Linux x86_64)
