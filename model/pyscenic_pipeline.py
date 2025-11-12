@@ -76,12 +76,23 @@ from threadpoolctl import threadpool_limits #force only the GRNBOOST2 phase to r
 from pyscenic.prune import prune2df
 ###
 
-# PySCENIC expects some global resources (TF list + motif database). Adjust the
-# paths below to match your installation. They are the **same** resources that
-# the original CLI would need.
-DEFAULT_TF_LIST = Path.home() / "Programs/miniconda3/envs/pyscenic_env/precice/data/input/resources/TF_names_v_1.01_human.txt"
-DEFAULT_MOTIF_DB = [Path.home() / "Programs/miniconda3/envs/pyscenic_env/precice/data/input/resources/hg38__refseq-r80__500bp_up_and_100bp_down_tss.mc9nr.genes_vs_motifs.rankings.feather"]
-DEFAULT_MOTIF_ANNOTATIONS = Path.home() / "Programs/miniconda3/envs/pyscenic_env/precice/data/input/resources/motifs-v9-nr.hgnc-m0.001-o0.0.tbl"
+# PySCENIC expects some global resources (TF list + motif database). These will be fetched from the precice/input/resources folder
+DEFAULT_RESOURCE_DIR = Path.cwd().parent / "data" / "input" / "resources"
+
+DEFAULT_TF_LIST = DEFAULT_RESOURCE_DIR / "TF_names_v_1.01_human.txt"
+DEFAULT_MOTIF_DB = [
+    DEFAULT_RESOURCE_DIR / "hg38__refseq-r80__500bp_up_and_100bp_down_tss.mc9nr.genes_vs_motifs.rankings.feather"
+]
+DEFAULT_MOTIF_ANNOTATIONS = (
+    DEFAULT_RESOURCE_DIR / "motifs-v9-nr.hgnc-m0.001-o0.0.tbl"
+)
+
+# Safety check: warn if expected resource files are missing
+for f in [DEFAULT_TF_LIST, *DEFAULT_MOTIF_DB, DEFAULT_MOTIF_ANNOTATIONS]:
+    if not f.exists():
+        print(f"[WARN] Resource file not found: {f}")
+    else:
+        print(f"[INFO] Found resource file: {f}")
 
 # ──────────────────────────────────────────────────────────────────────────────
 #  Helpers

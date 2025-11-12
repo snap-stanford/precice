@@ -79,5 +79,4 @@ def remove_mito_ribo_genes(adata):
 
     keep = np.invert(remove)
 
-    adata = adata[:, keep]
     return adata[:, keep].copy() #Modified 2025-08-21
