@@ -39,8 +39,9 @@ def create_net(args):
     # Save as graph
     G = nx.from_pandas_edgelist(edges,create_using=nx.DiGraph())
     G_relabelled = nx.relabel_nodes(G,utils.invert_dict(mappings))
-    nx.write_edgelist(G_relabelled, 'G_all_edges_'+args.name,
-                      delimiter=',', data=dict(G.out_degree(G.nodes())))
+    nx.write_edgelist(G_relabelled, f"G_all_edges_{args.name}.csv",
+                      delimiter=',', data=FALSE)
+
 
     # Remove all non-TF genes
     TF_nodes = get_TFs(args.species)
@@ -50,8 +51,9 @@ def create_net(args):
 
     # Save new graph
     G_relabelled = nx.relabel_nodes(G,utils.invert_dict(mappings))
-    nx.write_edgelist(G_relabelled, 'TF_only_'+args.name,
-                      delimiter=',', data=dict(G.out_degree(G.nodes())))
+    nx.write_edgelist(G_relabelled, f"TF_only_{args.name}.csv",
+                      delimiter=',', data=FALSE)
+
 
 
 if __name__ == '__main__':

@@ -47,8 +47,17 @@ class flow_model():
            self.G = nx.from_pandas_edgelist(G_df, source=0,
                             target=1, create_using=nx.DiGraph())
         
+        #self.read_weights = pd.read_csv(args.adjacency, index_col=0) #Commented out 2025-08-20 and replaced with this replacement block
+        ### Replacement block 2025-08-20 ###
         if args.adjacency is not None:
-            self.read_weights = pd.read_csv(args.adjacency, index_col=0)
+            self.read_weights = pd.read_csv(args.adjacency)
+            if 'TF' not in self.read_weights.columns:
+                # handle legacy files saved with TF in the index
+                self.read_weights = self.read_weights.reset_index()
+                if self.read_weights.columns[0] != 'TF':
+                    self.read_weights = self.read_weights.rename(columns={self.read_weights.columns[0]: 'TF'})
+        ### End replacement block            
+            
             self.G = nx.from_pandas_edgelist(self.read_weights, source='TF',
                             target='target', edge_attr = 'importance',
                             create_using=nx.DiGraph())
@@ -106,7 +115,7 @@ class flow_model():
            for w in self.read_weights.iterrows():
               add_weight(self.G, w[1]['TF'], w[1]['target'], w[1]['importance'])
 
-        if args.add_zero_genes:
+        if self.args.add_zero_genes:
             # Create a list of genes with zero differential expression
             TFs = self.TFs
             zero_DE_genes = [l for l in self.G.nodes()
@@ -207,22 +216,10 @@ class flow_model():
         errors_iqr = [np.percentile(errors,25), np.percentile(errors,75)]
         return errors
 
-        # TODO Closed form
-        #chi2 = ncx2.fit(errors)
-        #errors_ci = ncx2.interval(0.90, chi2[0], chi2[1], chi2[2], chi2[3])
-
-        #mu = np.dot(self.A, perturb_vec)
-        #sigma = np.dot(np.dot(self.A, cov), self.A.T)
-        # The distribution over the perturbation outcomes can be obtained
-        # This has to then be squared and summed
-        # Estimate this as a non-central chi-square distribution
-
-
     def get_error(self, perturb_vec):
         error = np.sqrt(np.sum(np.square(self.B -
                                          np.matmul(self.A, perturb_vec))))
         return error
-
 
     def filter_k_active_sol(self, perturb_dfs, return_all_errors=False):
         # Measure the complete network perturbation produced
@@ -301,9 +298,9 @@ if __name__ == '__main__':
                         default='human')
 
     # Lambda setting
-    parser.add_argument('--max_step', type=int, default=1,
+    parser.add_argument('--max_step', type=int, default=1, #Tune this parameter (increase to 10 or even 100, though increases compute time!)
                         help='(default: %(default)s)')
-    parser.add_argument('--step_size', type=float, default=1e-4,
+    parser.add_argument('--step_size', type=float, default=1e-4, #Tune this parameter to resolve multiple genes per row (after first row)
                         help='(default: %(default)s)')
     parser.add_argument('--max_exp', type=int, default=False,
                         help='(default: %(default)s)')
